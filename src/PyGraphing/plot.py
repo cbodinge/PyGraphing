@@ -21,6 +21,13 @@ class Plot(Embedded):
         else:
             return x
 
+    def pixel2cart_x(self, x: list[float]) -> list[float]:
+        if self.w != 0:
+            dx = (self.xmax - self.xmin) / self.w
+            return [(xi * dx + self.xmin) for xi in x]
+        else:
+            return x
+
     def cart2pixel_y(self, y: list[float]) -> list[float]:
         if self.h != 0:
             dy = (self.ymax - self.ymin) / self.h
@@ -28,6 +35,13 @@ class Plot(Embedded):
                 return [self.h - ((yi - self.ymin) / dy) for yi in y]
             else:
                 return y
+        else:
+            return y
+
+    def pixel2cart_y(self, y: list[float]) -> list[float]:
+        if self.h != 0:
+            dy = (self.ymax - self.ymin) / self.h
+            return [dy * (self.h - yi) + self.ymin for yi in y]
         else:
             return y
 
