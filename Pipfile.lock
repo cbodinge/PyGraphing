@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "61979c4d6caa55f4787dd06917e12dd1082f0517b4d9d31d9546568199a32113"
+            "sha256": "14afe8c63de5c01488a974591057c24519dc17602aaba9a110e01546ffa10df7"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,13 +16,21 @@
         ]
     },
     "default": {
-        "psvg": {
+        "fonttools": {
             "hashes": [
-                "sha256:43bb8250df199695220ef50397a46573d5bd5e425d26c60064f3ce3dbe6a8b47",
-                "sha256:59536a212562d976cef6dd095fbb4a8e56eab736cdc6127e62959f8952c353c9"
+                "sha256:86918c150c6412798e15a0de6c3e0d061ddefddd00f97b4f7b43dfa867ad315e",
+                "sha256:afae1b39555f9c3f0ad1f0f1daf678e5ad157e38c8842ecb567951bf1a9b9fd7"
             ],
             "index": "pypi",
-            "version": "==0.0.1"
+            "version": "==4.37.4"
+        },
+        "psvg": {
+            "hashes": [
+                "sha256:83514fe23fd3f080d96febd59a514e03351b9ce1074da16ce6e14f2cc850310c",
+                "sha256:cec0eb394842550bf7038f8df34aa3519b71ab905029688f8db92ec50502c50e"
+            ],
+            "index": "pypi",
+            "version": "==0.0.2"
         }
     },
     "develop": {}

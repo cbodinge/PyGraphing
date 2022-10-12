@@ -1,6 +1,7 @@
 from PySVG import Section
-from PySVG.Draw import Rect
+from PySVG.Draw import Rect, Generic_Path
 from .box import Box
+from ..accessories.bezier import path_points
 
 
 class Scatter(Section):
@@ -49,4 +50,28 @@ class ScatterBoxes(Scatter):
         super()._process()
 
     def construct(self):
+        return super().construct()
+
+
+class ScatterBezier(Scatter):
+    def __init__(self, plot, shape, x: list, y: list):
+        super().__init__(plot, shape, x, y)
+        self.line = Generic_Path()
+
+    def _process(self):
+        x = self.plot.cart2pixel_x(self.exes)
+        y = self.plot.cart2pixel_y(self.whys)
+
+        self.line.points = path_points(x, y)
+        self.add_child(self.line)
+
+        for i in range(len(x)):
+            icon = self.shape.copy()
+            icon.x = x[i] - icon.w / 2
+            icon.y = y[i] - icon.h / 2
+
+            self.add_child(icon)
+
+    def construct(self):
+        self._process()
         return super().construct()
