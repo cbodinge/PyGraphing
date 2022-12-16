@@ -1,4 +1,4 @@
-from PySVG import Section
+from PySVG import Section, Image
 from PySVG.Draw import Rect, Generic_Path
 from .box import Box
 from ..accessories.bezier import path_points
@@ -74,4 +74,31 @@ class ScatterBezier(Scatter):
 
     def construct(self):
         self._process()
-        return super().construct()
+        return super(Scatter, self).construct()
+
+
+class ScatterImage(Scatter):
+    """
+    Must Be careful that the image is exactly the dimensions of the plot. Will address later.
+    """
+
+    def __init__(self, plot, path, shape, x: list, y: list):
+        super().__init__(plot, shape, x, y)
+        self.image = Image(0, 0, path)
+
+    def _process(self):
+        x = self.plot.cart2pixel_x(self.exes)
+        y = self.plot.cart2pixel_y(self.whys)
+
+        self.add_child(self.image)
+
+        for i in range(len(x)):
+            icon = self.shape.copy()
+            icon.x = x[i] - icon.w / 2
+            icon.y = y[i] - icon.h / 2
+
+            self.add_child(icon)
+
+    def construct(self):
+        self._process()
+        return super(Scatter, self).construct()
