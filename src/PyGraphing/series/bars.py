@@ -4,100 +4,88 @@ from ..plot import Plot
 
 
 class Bar(Rect):
-    def __init__(self, fill=(0, 0, 0), fill_opacity=1, stroke=None, stroke_width=1):
+    def __init__(self, ancestor: Rect):
         super().__init__(0, 0, 0, 0)
-        self.fill = fill
-        self.fill_opacity = fill_opacity
-        self.stroke = stroke
-        self.stroke_width = stroke_width
+        self.inherit(ancestor)
 
         self.index = 0
+        self.group = 0
         self.value = 0
         self.name = ''
 
 
-class Group(Section):
-    def __init__(self, parent):
+class Bars(Section):
+    def __init__(self, parent: Plot, n_groups, n_bars):
         super().__init__(0, 0)
-        self.plot = parent
         self.bars = []
-        self.filled = 0.50
+        self.plot = parent
 
-        self.bar_width = 0
-        self.bar_space = 0
+        self.bar_ratio = 0.05
+        self.group_ratio = 0.5
 
-    @property
-    def w(self):
-        width = self.bar_width * self.nbars + self.bar_space * (1 + self.nbars)
-        return width
+        self.n_groups = n_groups
+        self.n_bars = n_bars
 
-    @property
-    def position(self):
-        return self.plot.pixel2cart_x([self.x + self.w/2])[0]
+        self._bw = 0
+        self._gw = 0
+        self._bs = 0
+        self._gs = 0
 
-    @property
-    def nbars(self):
-        return len(self.bars)
+    def _bar_dict(self):
+        d = {}
+        for i in range(self.n_groups):
+            for j in range(self.n_bars):
+                b = [bar for bar in self.bars if bar.group == i and bar.index == j]
+                if b:
+                    d[(i, j)] = b[0]
+                else:
+                    d[(i, j)] = None
 
-    def add_bar(self, bar: Bar, x: int, y: float, bar_name: str = ''):
-        bar = bar.copy()
-        bar.index = x
-        bar.value = y
-        bar.name = bar_name
-        self.bars.append(bar)
+        return d
 
-    def set_bars(self):
-        n = len(self.bars)
-        exes = [(i + 1) * self.bar_space + i * self.bar_width for i in range(n)]
-        zero = self.plot.cart2pixel_y([0])[0]
+    def _dimensions(self):
+        w = self.plot.xmax - self.plot.xmin
 
-        for bar in self.bars:
-            bar.x, bar.w = exes[bar.index - 1], self.bar_width
-            bar.y = self.plot.cart2pixel_y([bar.value])[0]
-            bar.h = zero - bar.y
+        total_group_width = w * (1 - self.group_ratio)
+        group_width = total_group_width / self.n_groups
+        group_space = w * self.group_ratio / (self.n_groups + 1)
 
-            self.add_child(bar)
+        bar_width = group_width * (1 - self.bar_ratio) / self.n_bars
+        bar_space = group_width * self.bar_ratio / (self.n_bars - 1)
 
+        self._bw = bar_width
+        self._bs = bar_space
+        self._gw = group_width
+        self._gs = group_space
 
-class BarPlot(Plot):
-    def __init__(self):
-        super().__init__()
-        self.groups = []
+        self._rects()
 
-        self.bar_area_ratio = 0.80
-        self.space_ratio = 3
-
-        self._bar_width = 0
-        self._gspace = 0
-        self._bspace = 0
-
-    def _set_dimensions(self):
-        bar_area = self.w * self.bar_area_ratio
-        space_area = self.w * (1 - self.bar_area_ratio)
-        n_bars = sum([group.nbars for group in self.groups])
-        n_groups = len(self.groups)
-
-        self._bar_width = bar_area / n_bars
-        self._bspace = space_area / (self.space_ratio*(n_groups - 1) + n_bars + n_groups)
-        self._gspace = self._bspace * self.space_ratio
-
-        a=1
-
-    def add_group(self, group: Group):
-        self.groups.append(group)
-
-    def _set_groups(self):
+    def _rects(self):
         x = 0
-        for group in self.groups:
-            group.x = x
-            group.bar_width = self._bar_width
-            group.bar_space = self._bspace
-            x += group.w + self._gspace
-            group.set_bars()
+        bars = self._bar_dict()
+        for i in range(self.n_groups):
+            x = i + 1 - self._gw / 2
+            for j in range(self.n_bars):
+                bar = bars[(i, j)]
+                if bar:
+                    self._set_xywh(bar, x)
+                    self.add_child(bar)
 
-            self.add_child(group)
+                x += self._bw + self._bs
+            x -= self._bs
 
-    def set(self):
-        self._set_dimensions()
-        self._set_groups()
+    def _set_xywh(self, bar, x):
+        exes = [x, x + self._bw]
+        whys = [bar.value, 0]
 
+        x = self.plot.cart2pixel_x(exes)
+        w = abs(x[0] - x[1])
+        y = self.plot.cart2pixel_y(whys)
+        h = abs(y[0] - y[1])
+
+        bar.x, bar.y, bar.w, bar.h = min(x), min(y), w, h
+
+    def construct(self):
+        self._dimensions()
+
+        return super().construct()
