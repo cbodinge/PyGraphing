@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 fonttools = "*"
-psvg = "*"
 build = "*"
 twine = "*"
+psvg = "*"
 
 [dev-packages]
 

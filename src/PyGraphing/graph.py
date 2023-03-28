@@ -1,7 +1,7 @@
 from PySVG import Text, Font
 from PySVG.Draw import Rect
 from .plot import Plot
-from .legend import Legend
+from .legend import VLegend
 from .frame import Frame
 from PySVG.SVG import Embedded
 
@@ -22,7 +22,7 @@ class Graph(Embedded):
         self.title = ''
         self.background = Rect()
 
-        self.legend = Legend(self)
+        self.legend = VLegend(self.text())
         self.plot = Plot()
         self.frame = Frame(self.plot)
 

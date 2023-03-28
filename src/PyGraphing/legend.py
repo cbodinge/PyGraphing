@@ -1,65 +1,149 @@
-from PySVG.SVG import Embedded, Section
+from PySVG.SVG import SVG, Section
 from PySVG.Draw import Rect
+from PySVG import Text
 from .icon import Icon
 
 
-class Legend(Embedded):
-    def __init__(self, parent):
-        super().__init__()
-        self.parent = parent
+class Item(Section):
+    def __init__(self, icon: Icon = None, name: Text = None):
+        super().__init__(0, 0)
+
+        self.w = 0
+        self.h = icon.h + 5
+
+        self.left = 0
+        self.right = 0
+        self.middle = 0
+
+        self.icon = icon
+
+        self.text = name
+
+        self.background = Rect(0, 0, self.w, self.h)
+        self.background.active = False
+
+    def fit_width(self):
+        text_width = self.text.font.getTextWidth(self.text.text)
+        self.w = self.icon.w + self.left + self.middle + self.right + text_width
+        return self.w
+
+    def construct(self):
+        if self.background.active:
+            self.background.w = self.w
+            self.background.h = self.h
+            self.add_child(self.background)
+
+        if self.icon is not None:
+            if self.icon.active:
+                self.add_child(self.icon)
+
+        if self.text is not None:
+            if self.text.active:
+                self.add_child(self.text)
+
+        return super().construct()
+
+
+class NormalItem(Item):
+    def __init__(self, icon: Icon, text: Text):
+        super().__init__(icon, text)
+
+    def _set(self):
+        self.icon.x = self.left
+        self.icon.y = self.h / 2 - self.icon.h / 2
+
+        self.text.x = self.left + self.middle + self.icon.w
+        self.text.y = self.h / 2
+
+        self.text.baseline = 'central'
+        self.text.anchor = 'start'
+
+    def construct(self):
+        self._set()
+
+        return super().construct()
+
+
+class Legend(SVG):
+    def __init__(self, text: Text):
+        super().__init__(0, 0)
+        self.text = text
+        self.distance = 5
+
+        self.x = 0
+        self.y = 0
+
         self.items = []
 
-        self.dy = 10
-
-        self.text = parent.text()
         self.background = Rect()
-        self.active = True
+        self.background.active = False
 
     def add_item(self, name: str, shape: Icon):
-        self.items.append(Item(self, name, shape))
+        text = self.text.copy()
+        text.text = name
+
+        self.items.append(NormalItem(shape, text))
 
     def xywh(self, x, y, w, h):
         self.x = x
         self.y = y
-        self.w = w
-        self.h = h
+        self.size = (w, h)
 
-    def set_items(self):
-        i = 0
+    def construct(self):
+        if self.x == 0 and self.y == 0:
+            return super().construct()
+
+        svg = super().construct()
+
+        return f'<g transform="translate({self.x} {self.y})>\n   {svg}\n</g>'
+
+
+class VLegend(Legend):
+    def __init__(self, text: Text):
+        super().__init__(text)
+
+        self.y0 = 0
+
+    def _set(self):
+        w, h = self.size
+        y = self.y0
         for item in self.items:
-            item.x, item.y = 10, i * 2 * self.dy
+            item.x = 0
+            item.y = y
+            item.w = w
+
+            y += item.h + self.distance
+
             self.add_child(item)
-            i += 1
 
     def construct(self):
         self.add_child(self.background)
-        self.set_items()
+        self._set()
+
         return super().construct()
 
 
-class Item(Section):
-    def __init__(self, parent: Legend, name: str, icon: Icon):
-        """
-        Represents an entry into the legend.
+class HLegend(Legend):
+    def justify(self):
+        w, _ = self.size
+        widths = [item.fit_width() for item in self.items]
+        self.distance = (w - sum(widths)) / (len(widths) - 1)
 
-        Parameters
-        ----------
-        name: The descriptive text that will be displayed in the legend
-        icon : object
-        """
-        super().__init__(0, 0)
-        self.icon = icon
-        self.name = name
-        self.parent = parent
-        self.text = parent.text
-        self.active = True
+    def _set(self):
+        w, h = self.size
+        x = 0
 
-        self.add_child(self.text)
-        self.add_child(self.icon)
+        for item in self.items:
+            item.x = x
+            item.y = h / 2
+            item.fit_width()
+
+            x += item.w + self.distance
+
+            self.add_child(item, 'child')
 
     def construct(self):
-        w, h = self.icon.w, self.icon.h
-        self.text.x, self.text.y = 2 * w, h / 2
-        self.text.text = self.name
+        self.add_child(self.background)
+        self._set()
 
         return super().construct()
