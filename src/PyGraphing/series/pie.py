@@ -1,6 +1,6 @@
 from ..plot import Plot
 from PySVG import Section
-from PySVG.Draw import Circle, Generic_Path, PartialCircle
+from PySVG.Draw import Generic_Path, PartialCircle
 from math import pi
 
 
@@ -19,23 +19,20 @@ class Pie(Section):
         n = len(self._values)
         x = self.plot.w / 2
         y = self.plot.h / 2
-        r = 0.8 * min([self.plot.w, self.plot.h])
+        r = 0.45 * min([self.plot.w, self.plot.h])
 
         theta = 0
         total = sum(self._values)
-        for i in range(n - 1):
-            chunk = self._chunks[n - i - 1]
-            value = self._values[n - i - 1]
-            theta += value * 2 * pi / total
+        for i in range(n):
+            chunk = self._chunks[i]
+            value = self._values[i]
+            theta2 = value * 2 * pi / total
 
-            wedge = PartialCircle(x, y, r, theta)
+            wedge = PartialCircle(x, y, r, theta, theta2)
+            theta += theta2
             wedge.inherit(chunk)
 
             self.add_child(wedge)
-
-        circle = Circle(x, y, r)
-        circle.inherit(self._chunks[n])
-        self.add_child(circle)
 
     def construct(self):
         self._process()
