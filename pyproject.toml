@@ -1,6 +1,6 @@
 [project]
 name = "PyGraphing"
-version = "0.1.6"
+version = "1.0.0"
 authors = [
     { name = "Carter Bodinger", email = "carterallenbodinger@yahoo.com" },
 ]

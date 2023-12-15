@@ -1,64 +1,112 @@
-from PySVG import Text, Font
-from PySVG.Draw import Rect
+from PySVG import Text, Font, Rect, Section, TextBox
 from .plot import Plot
-from .legend import VLegend
+from .legend import Legend
 from .frame import Frame
-from PySVG.SVG import Embedded
+
+default_font = Font('Arial', '400')
 
 
-class Graph(Embedded):
-    def __init__(self, w: float, h: float):
+class Graph(Section):
+    def __init__(self, font: Font, x: float = 0, y: float = 0, w: float = 0, h: float = 0,
+                 title: str = '', title_font: Font = None, subtitle: str = '', subtitle_font: Font = None):
         """
         Graph is an SVG Object representing a generic graph.
         A Graph is made up of several parts: Legend, Plot Area, Frame, Title.
 
         :param w: width of the Graph object in pixels
         :param h: height of the Graph object in pixels
+        :param x: horizontal position of the Graph object in pixels
+        :param y: vertical position of the Graph object in pixels
         """
-        # Graph Parameters
-        super().__init__()
-        self.w, self.h = w, h
+        super().__init__(x=x, y=y, w=w, h=h)
 
-        self.title = ''
-        self.background = Rect()
+        self.background = Rect(active=False)
+        self.addChild(self.background)
 
-        self.legend = VLegend(self.text())
+        self.font = font
+
+        title = Text(title_font if title_font is not None else font, title)
+        self.title = TextBox(title)
+        self.addChild(self.title.root)
+
+        subtitle = Text(subtitle_font if subtitle_font is not None else font, subtitle)
+        self.subtitle = TextBox(subtitle)
+        self.addChild(self.subtitle.root)
+
+        self.label = TextBox(Text(font, ''))
+        self.addChild(self.label.root)
+
+        self.xlabel = TextBox(Text(font, ''))
+        self.addChild(self.xlabel.root)
+
+        self.ylabel = TextBox(Text(font, ''))
+        self.addChild(self.ylabel.root)
+
+        self.legend = Legend()
+        self.addChild(self.legend.root)
+
         self.plot = Plot()
-        self.frame = Frame(self.plot)
+        self.addChild(self.plot.root)
 
-        self.set_sizes()
+        self.frame = Frame(self)
+        self.addChild(self.frame)
 
-    def _title(self):
-        t = Text()
-        t.x, t.y = 0.50 * self.w, 0.05 * self.h
-        t.font = Font('IBM Plex Mono', 13, '700')
-        t.baseline = 'central'
-        t.anchor = 'middle'
+    def text(self, **kwargs):
+        return Text(self.font, baseline='central', **kwargs)
 
-        return t
-
-    def text(self):
-        t = Text()
-        t.font = Font('IBM Plex Mono', 10, '600')
-        t.baseline = 'central'
-
-        return t
-
-    def set_sizes(self):
+    def set_sizes(self, xywh=(0, 0, 1, 1)):
         """
         Sets the sizes for the Graph and all of its children.
         ----------------------------------------------------------------------
         """
+        self._verify()
+
         w, h = self.w, self.h
-        dy = 0.10 * h
-        self.legend.xywh(w * 0.7, dy, w * 0.20, 0.5 * (h - 2 * dy))
-        self.plot.xywh(w * .1, dy, w * .85, h - 100 - self.plot.y)
+        px = w * xywh[0]
+        py = h * xywh[1]
+        pw = w * xywh[2]
+        ph = h * xywh[3]
 
-    def construct(self):
-        self.add_child(self.background)
-        self.add_child(self.legend, 'Legend')
-        self.add_child(self.plot, 'Plot')
-        self.add_child(self.frame, 'Frame')
-        self.add_child(self.title)
+        self.plot.xywh = px, py, pw, ph
 
-        return super().construct()
+        if self.title.root.active and self.subtitle.root.active:
+            self.title.xywh = px, 0, pw, py / 2
+            self.title.alignment = (0, 0)
+            self.title.set()
+
+            self.subtitle.xywh = px, py / 2, pw, py / 2
+            self.subtitle.set()
+
+        elif self.title.root.active and not self.subtitle.root.active:
+            self.title.xywh = px, 0, pw, py
+            self.title.set()
+
+        if self.legend.root.active:
+            self.legend.xywh = px + pw + 10, py, w - 10 - pw - px, ph
+
+        if self.xlabel.root.active:
+            self.xlabel.xywh = px, py + ph, pw, h - py - ph
+            self.xlabel.set()
+
+        if self.ylabel.root.active:
+            self.ylabel.xywh = 0, py, ph, px
+            self.ylabel.root.angle = -90
+            self.ylabel.root.xc = self.ylabel.h / 2 - self.ylabel.y
+            self.ylabel.root.yc = self.ylabel.w / 2
+            self.ylabel.set()
+
+    def _verify(self):
+        if self.title.text == '':
+            self.title.root.active = False
+
+        if self.subtitle.text == '':
+            self.subtitle.root.active = False
+
+        if self.xlabel.text == '':
+            self.xlabel.root.active = False
+
+        if self.ylabel.text == '':
+            self.ylabel.root.active = False
+
+        if self.label.text == '':
+            self.label.root.active = False
