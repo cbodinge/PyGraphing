@@ -1,5 +1,5 @@
 from ..plot import Plot
-from PySVG import G
+from PySVG import G, Path
 from numpy import ndarray
 from ..icon import Icon
 
@@ -36,3 +36,17 @@ class Scatter(Series):
         icon.y = y
 
         self.add_child(icon.root)
+
+
+class Line(Series):
+    def __init__(self, path: Path, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.path = path
+        self.add_child(self.path)
+
+    def _process(self):
+        x = self.plot.cart2pixel_x(self.X)
+        y = self.plot.cart2pixel_y(self.Y)
+        f = ['M'] + ['L'] * (len(x) - 1)
+
+        self.path.points = [(i, j, k) for i, j, k in zip(f, x, y)]
