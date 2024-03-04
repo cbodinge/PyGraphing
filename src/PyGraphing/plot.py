@@ -8,6 +8,7 @@ class Plot(Section):
         super().__init__()
         self.xmin, self.ymin, self.xmax, self.ymax = 0, 0, 1, 1
         self.background = Rect()
+        self.background.active = False
         self.addChild(self.background)
 
     @property

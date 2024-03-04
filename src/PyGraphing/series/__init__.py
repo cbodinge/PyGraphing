@@ -1,1 +1,1 @@
-from .series import Scatter
+from .series import Scatter, Line

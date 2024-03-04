@@ -30,7 +30,7 @@ class Item:
         self.icon.y = self.y + self.top
 
         self.text.x = self.x + self.left + self.icon.w + self.midl
-        self.text.y = self.top + self.icon.y / 2 + self.y
+        self.text.y = self.icon.y + self.icon.h / 2
 
 
 class Legend(Section):
@@ -45,14 +45,16 @@ class Legend(Section):
     def addItem(self, icon: Icon, text: Text, **kwargs):
         self._items.append(Item(icon, text, **kwargs))
 
-    def _set(self):
+    def set(self):
         y = self.y0
         for item in self._items:
             item.y = y
             y += item.h
 
-            self.addChild(item.icon)
+            self.addChild(item.icon.root)
             self.addChild(item.text)
+
+            item.set()
 
     @property
     def xywh(self):
