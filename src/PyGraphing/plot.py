@@ -1,6 +1,7 @@
 from PySVG import Section, Rect
 from numpy import ndarray, array
 from warnings import warn
+from NumpyTransforms.Affine import Affine
 
 
 class Plot(Section):
@@ -65,3 +66,11 @@ class Plot(Section):
             return y[0]
         else:
             return 0
+
+    def transform(self, x: ndarray, y: ndarray):
+        affine = Affine()
+        affine.translate(-self.w * self.xmin / (self.xmax - self.xmin),
+                         self.h * self.ymin / (self.ymax - self.ymin) + self.h)
+        affine.scale(self.w / (self.xmax - self.xmin), -self.h / (self.ymax - self.ymin))
+
+        return affine(x, y)

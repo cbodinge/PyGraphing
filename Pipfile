@@ -9,6 +9,7 @@ build = "*"
 twine = "*"
 psvg = "*"
 numpy = "*"
+numpytransforms = "*"
 
 [dev-packages]
 

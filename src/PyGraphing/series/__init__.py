@@ -1,1 +1,1 @@
-from .series import Scatter, Line
+from .scatter import Scatter, Line, Curve, ErrorTop, ErrorBars, ErrorBottom
