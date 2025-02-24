@@ -1,4 +1,4 @@
-from PySVG import G, Path, Text
+from PSVG import G, Path, Text
 from .data_sturctures import Tree
 from collections import namedtuple
 from numpy import array

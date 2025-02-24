@@ -1,4 +1,4 @@
-from PySVG import Section, Rect
+from PSVG import Section, Rect
 from numpy import ndarray, array
 from warnings import warn
 from NumpyTransforms.Affine import Affine

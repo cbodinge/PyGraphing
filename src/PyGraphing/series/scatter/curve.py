@@ -2,7 +2,7 @@ from ...icon import Icon
 from ...plot import Plot
 from numpy import ndarray
 from .scatter import Scatter
-from PySVG import Path
+from PSVG import Path
 from NumpyTransforms.Bezier import interpolate as bezier
 
 

@@ -7,9 +7,9 @@ name = "pypi"
 fonttools = "*"
 build = "*"
 twine = "*"
-psvg = "*"
 numpy = "*"
 numpytransforms = "*"
+psvg = "*"
 
 [dev-packages]
 

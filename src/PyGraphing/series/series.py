@@ -1,5 +1,5 @@
 from ..plot import Plot
-from PySVG import G
+from PSVG import G
 
 
 class Series(G):

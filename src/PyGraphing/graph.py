@@ -1,4 +1,4 @@
-from PySVG import Text, Font, Rect, Section, TextBox
+from PSVG import Text, Font, Rect, Section, TextBox
 from .plot import Plot
 from .legend import Legend
 from .frame import Frame

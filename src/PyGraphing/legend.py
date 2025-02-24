@@ -1,4 +1,4 @@
-from PySVG import Section, Rect, Text
+from PSVG import Section, Rect, Text
 from .icon import Icon
 
 

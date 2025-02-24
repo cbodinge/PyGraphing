@@ -1,4 +1,4 @@
-from PySVG import Section, Node
+from PSVG import Section, Node
 from typing import overload
 
 

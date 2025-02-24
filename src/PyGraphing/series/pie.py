@@ -1,6 +1,6 @@
 # from ..plot import Plot
-# from PySVG import Section
-# from PySVG.Draw import Generic_Path, PartialCircle
+# from PSVG import Section
+# from PSVG.Draw import Generic_Path, PartialCircle
 # from math import pi
 #
 #
